@@ -42,14 +42,14 @@ resource "azurerm_storage_account" "sa" {
           days = var.blob_delete_retention_days
         }
       }
-      
+
       dynamic "container_delete_retention_policy" {
         for_each = (var.container_delete_retention_days == 0 ? [] : [1])
         content {
           days = var.container_delete_retention_days
         }
       }
-      
+
       dynamic "cors_rule" {
         for_each = (var.blob_cors == null ? {} : var.blob_cors)
         content {
@@ -86,4 +86,13 @@ resource "azurerm_storage_encryption_scope" "scope" {
   storage_account_id                 = azurerm_storage_account.sa.id
   source                             = coalesce(each.value.source, "Microsoft.Storage")
   infrastructure_encryption_required = coalesce(each.value.enable_infrastructure_encryption, var.infrastructure_encryption_enabled)
+}
+
+resource "azurerm_storage_queue" "queues" {
+  for_each = length(var.queue_names) > 0 ? toset(var.queue_names) : {}
+
+  name                 = each.key
+  storage_account_name = azurerm_storage_account.sa.name
+  metadata             = lookup(var.queue_metadata_map, each.key, {})
+
 }

@@ -146,3 +146,9 @@ output "encryption_scope_ids" {
     k => azurerm_storage_encryption_scope.scope[k].id
   }
 }
+
+output "queue_urls" {
+  value = {
+    for name, q in azurerm_storage_queue.queues : name => q.id
+  }
+}
