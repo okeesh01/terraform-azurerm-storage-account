@@ -89,7 +89,7 @@ resource "azurerm_storage_encryption_scope" "scope" {
 }
 
 resource "azurerm_storage_queue" "queues" {
-  for_each = length(var.queue_names) > 0 ? toset(var.queue_names) : {}
+  for_each = var.queue_names != [] ? toset(var.queue_names) : {}
 
   name                 = each.key
   storage_account_name = azurerm_storage_account.sa.name
