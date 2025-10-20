@@ -71,10 +71,16 @@ variable "enable_sftp" {
   default     = false
 }
 
-variable "enable_https_traffic_only" {
+variable "https_traffic_only_enabled" {
   description = "Forces HTTPS if enabled."
   type        = bool
   default     = true
+}
+
+variable "public_network_access_enabled" {
+  description = "Allow or disallow public access to all blobs or containers in the storage account."
+  type        = bool
+  default     = false
 }
 
 variable "min_tls_version" {
@@ -106,7 +112,7 @@ variable "service_endpoints" {
 variable "traffic_bypass" {
   description = "Specifies whether traffic is bypassed for Logging/Metrics/AzureServices. Valid options are any combination of Logging, Metrics, AzureServices, or None."
   type        = list(string)
-  default     = ["None"]
+  default     = ["AzureServices"] // https://docs.bridgecrew.io/docs/enable-trusted-microsoft-services-for-storage-account-access
 }
 
 variable "blob_delete_retention_days" {
@@ -218,4 +224,47 @@ variable "queue_metadata_map" {
   type = map(map(string))
   default = {}
   description = "Map of queue name to its metadata map"
+}
+variable "allowed_copy_scope" {
+  description = "Restrict copy to and from Storage Accounts within an AAD tenant or with Private Links to the same VNet. Possible values are AAD and PrivateLink."
+  type        = string
+  default     = null
+}
+
+variable "smb_contributors" {
+  description = "List of SMB contributors to the storage shares, for ex: sre entra object id's, github runner sp id's etc."
+  type        = list(string)
+  default     = []
+}
+
+variable "share_files" {
+  description = "Files to be uploaded to the shares"
+  type = map(object({
+    file_share_name   = string
+    storage_share_url = string
+    fileset_path      = string
+    fileset_pattern   = string
+    content_type      = optional(string)
+  }))
+  default = {}
+}
+
+variable "storage_shares" {
+  description = "List of File Shares to be created in this Storage Account."
+  type = list(object({
+    name             = string
+    quota            = number
+    metadata         = optional(map(string))
+    enabled_protocol = optional(string)
+    acl = optional(list(object({
+      id = string
+      access_policy = object({
+        permissions = string
+        start       = optional(string)
+        expiry      = optional(string)
+      })
+    })))
+  }))
+  default  = []
+  nullable = false
 }

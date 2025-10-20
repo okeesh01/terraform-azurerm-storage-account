@@ -152,3 +152,7 @@ output "queue_urls" {
     for name, q in azurerm_storage_queue.queues : name => q.id
   }
 }
+output "storage_shares" {
+  description = "List of storage shares object."
+  value       = azurerm_storage_share.ss
+}
